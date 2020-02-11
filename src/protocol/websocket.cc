@@ -320,6 +320,8 @@ int swWebSocket_dispatch_frame(void **_data, int data_size)
         }
         else
         {
+            _data[2] = data + offset;
+            _data[3] = (void *) &(ws.payload_length);
             swReactorThread_dispatch(_data, data_size);
         }
         break;
@@ -358,7 +360,8 @@ int swWebSocket_dispatch_frame(void **_data, int data_size)
             // Dispatch the frame with the same format of message frame
             offset = length - ws.payload_length;
             proto->ext_flags = swWebSocket_get_ext_flags(ws.header.OPCODE, swWebSocket_get_flags(&ws));
-
+            _data[2] = data + offset;
+            _data[3] = (void *) &(ws.payload_length);
             swReactorThread_dispatch(_data, data_size);
 
             // Client attempt to close
