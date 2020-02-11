@@ -1,5 +1,13 @@
 #include "tests.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+int swString_explode(swString *str, char *delimiter, size_t delimiter_length, swStringExplodeHandler handler, void **data, int data_size);
+#ifdef __cplusplus
+}
+#endif
+
 TEST(string, rtrim)
 {
     char buf[1024];
@@ -89,4 +97,31 @@ TEST(string, strnaddr)
     }
 }
 
+static int explode_handler(void **data, int data_size)
+{
+    char *str = (char *) (data[data_size - 2]);
+    size_t length = (size_t) (data[data_size - 1]);
+    std::cout << str << std::endl;
+    std::cout << length << std::endl;
+    return 0;
+}
 
+TEST(string, explode)
+{
+    {
+        char haystack[1024];
+        uint32_t haystack_length;
+        char needle[8];
+        uint32_t needle_length;
+        swString str;
+        void *data[2];
+
+        strcpy(haystack, "hello world");
+        haystack_length = sizeof("hello world") - 1;
+        str.str = haystack;
+        str.length = haystack_length;
+        strcpy(needle, " ");
+        needle_length = sizeof(" ") - 1;
+        swString_explode(&str, needle, needle_length, explode_handler, data, sizeof(data) / sizeof(*data));
+    }
+}
