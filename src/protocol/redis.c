@@ -40,6 +40,10 @@ int swRedis_recv(swProtocol *protocol, swConnection *conn, swString *buffer)
     int ret;
     char *buf_ptr;
     size_t buf_size;
+    void *data[4];
+
+    data[0] = protocol;
+    data[1] = socket;
 
     swRedis_request *request;
     swSocket *socket = conn->socket;
@@ -162,7 +166,9 @@ int swRedis_recv(swProtocol *protocol, swConnection *conn, swString *buffer)
 
                     if (request->n_lines_received == request->n_lines_total)
                     {
-                        if (protocol->onPackage(protocol, socket, buffer->str, buffer->length) < 0)
+                        data[2] = buffer->str;
+                        data[3] = (void *) &(buffer->length);
+                        if (protocol->onPackage(data, 4) < 0)
                         {
                             return SW_ERR;
                         }

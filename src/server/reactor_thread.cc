@@ -1082,12 +1082,16 @@ static int swReactorThread_loop(swThreadParam *param)
 /**
  * dispatch request data [only data frame]
  */
-int swReactorThread_dispatch(swProtocol *proto, swSocket *_socket, char *data, uint32_t length)
+int swReactorThread_dispatch(void **_data, int data_size)
 {
+    swProtocol *proto = (swProtocol *) _data[0];
+    swSocket *socket = (swSocket *) _data[1];
+    char *data = (char *) _data[2];
+    size_t length = *((size_t *) _data[3]);
     swServer *serv = (swServer *) proto->private_data_2;
     swSendData task;
 
-    swConnection *conn = (swConnection *) _socket->object;
+    swConnection *conn = (swConnection *) socket->object;
 
     bzero(&task.info, sizeof(task.info));
     task.info.server_fd = conn->server_fd;

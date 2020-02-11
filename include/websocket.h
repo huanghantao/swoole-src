@@ -174,7 +174,7 @@ int swWebSocket_pack_close_frame(swString *buffer, int code, char* reason, size_
 void swWebSocket_print_frame(swWebSocket_frame *frame);
 
 ssize_t swWebSocket_get_package_length(swProtocol *protocol, swSocket *conn, char *data, uint32_t length);
-int swWebSocket_dispatch_frame(swProtocol *protocol, swSocket *conn, char *data, uint32_t length);
+int swWebSocket_dispatch_frame(void **_data, int data_size);
 
 SW_EXTERN_C_END
 

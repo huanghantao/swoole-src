@@ -856,7 +856,15 @@ typedef struct _swProtocol
     uint16_t real_header_length;
     uint16_t ext_flags;
 
-    int (*onPackage)(struct _swProtocol *, swSocket *, char *, uint32_t);
+    /**
+     * data[0] -> swProtocol *proto
+     * data[1] -> swSocket *_socket
+     * data[2] -> data
+     * data[3] -> length
+     * 
+     * data_size -> 4
+     */
+    int (*onPackage)(void **data, int data_size);
     ssize_t (*get_package_length)(struct _swProtocol *, swSocket *, char *, uint32_t);
     uint8_t (*get_package_length_size)(swSocket *);
 } swProtocol;

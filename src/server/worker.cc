@@ -25,7 +25,7 @@
 static int swWorker_onPipeReceive(swReactor *reactor, swEvent *event);
 static int swWorker_onStreamAccept(swReactor *reactor, swEvent *event);
 static int swWorker_onStreamRead(swReactor *reactor, swEvent *event);
-static int swWorker_onStreamPackage(swProtocol *proto, swSocket *sock, char *data, uint32_t length);
+static int swWorker_onStreamPackage(void **_data, int data_size);
 static int swWorker_onStreamClose(swReactor *reactor, swEvent *event);
 static int swWorker_reactor_is_empty(swReactor *reactor);
 
@@ -206,8 +206,12 @@ static int swWorker_onStreamClose(swReactor *reactor, swEvent *event)
     return SW_OK;
 }
 
-static int swWorker_onStreamPackage(swProtocol *proto, swSocket *sock, char *data, uint32_t length)
+static int swWorker_onStreamPackage(void **_data, int data_size)
 {
+    swProtocol *proto = (swProtocol *) _data[0];
+    swSocket *sock = (swSocket *) _data[1];
+    char *data = (char *) _data[2];
+    uint32_t length = *((uint32_t *) _data[3]);
     swServer *serv = (swServer *) proto->private_data_2;
 
     /**

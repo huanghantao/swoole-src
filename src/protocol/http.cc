@@ -796,16 +796,18 @@ uint8_t swHttpMix_get_package_length_size(swSocket *socket)
     }
 }
 
-int swHttpMix_dispatch_frame(swProtocol *proto, swSocket *socket, char *data, uint32_t length)
+int swHttpMix_dispatch_frame(void **_data, int data_size)
 {
+    swSocket *socket = (swSocket *) _data[1];
+
     swConnection *conn = (swConnection *) socket->object;
     if (conn->websocket_status == WEBSOCKET_STATUS_ACTIVE)
     {
-        return swWebSocket_dispatch_frame(proto, socket, data, length);
+        return swWebSocket_dispatch_frame(_data, data_size);
     }
     else if (conn->http2_stream)
     {
-        return swReactorThread_dispatch(proto, socket, data, length);
+        return swReactorThread_dispatch(_data, data_size);
     }
     else
     {

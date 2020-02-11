@@ -308,6 +308,10 @@ static int swPort_onRead_raw(swReactor *reactor, swListenPort *port, swEvent *ev
     swSocket *_socket = event->socket;
     swConnection *conn = (swConnection *) _socket->object;
     char *buffer = SwooleTG.buffer_stack->str;
+    void *data[4];
+
+    data[0] = &port->protocol;
+    data[1] = _socket;
 
     n = swSocket_recv(_socket, buffer, SwooleTG.buffer_stack->size, 0);
     if (n < 0)
@@ -332,7 +336,9 @@ static int swPort_onRead_raw(swReactor *reactor, swListenPort *port, swEvent *ev
     }
     else
     {
-        return swReactorThread_dispatch(&port->protocol, _socket, buffer, n);
+        data[2] = buffer;
+        data[3] = (void *) &n;
+        return swReactorThread_dispatch(data, 4);
     }
 }
 
@@ -367,9 +373,15 @@ static int swPort_onRead_check_length(swReactor *reactor, swListenPort *port, sw
  */
 static int swPort_onRead_http(swReactor *reactor, swListenPort *port, swEvent *event)
 {
+    swProtocol *protocol = &port->protocol;
     swSocket *_socket = event->socket;
     swConnection *conn = (swConnection *) _socket->object;
     swServer *serv = (swServer *) reactor->ptr;
+
+    void *data[4];
+
+    data[0] = protocol;
+    data[1] = _socket;
 
     if (conn->websocket_status >= WEBSOCKET_STATUS_HANDSHAKE)
     {
@@ -390,7 +402,6 @@ static int swPort_onRead_http(swReactor *reactor, swListenPort *port, swEvent *e
 #endif
 
     swHttpRequest *request = NULL;
-    swProtocol *protocol = &port->protocol;
 
     if (conn->object == NULL)
     {
@@ -552,8 +563,10 @@ static int swPort_onRead_http(swReactor *reactor, swListenPort *port, swEvent *e
             // send static file content directly in the reactor thread
             if (!serv->enable_static_handler || !swServer_http_static_handler_hit(serv, request, conn))
             {
+                data[2] = buffer->str;
+                data[3] = (void *) &(request->header_length);
                 // dynamic request, dispatch to worker
-                swReactorThread_dispatch(protocol, _socket, buffer->str, request->header_length);
+                swReactorThread_dispatch(data, 4);
             }
             if (conn->active && buffer->length > request->header_length)
             {
@@ -656,7 +669,9 @@ static int swPort_onRead_http(swReactor *reactor, swListenPort *port, swEvent *e
         buffer->length = request_length;
     }
 
-    swReactorThread_dispatch(protocol, _socket, buffer->str, buffer->length);
+    data[2] = buffer->str;
+    data[3] = (void *) &(buffer->length);
+    swReactorThread_dispatch(data, 4);
     swHttpRequest_free(conn);
 
     return SW_OK;

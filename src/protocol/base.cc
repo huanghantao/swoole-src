@@ -58,6 +58,10 @@ static sw_inline int swProtocol_split_package_by_eof(swProtocol *protocol, swSoc
 #endif
 
     int eof_pos;
+    void *data[4];
+
+    data[0] = protocol;
+    data[1] = conn;
     _find_eof:
     if (buffer->length < protocol->package_eof_len)
     {
@@ -82,8 +86,10 @@ static sw_inline int swProtocol_split_package_by_eof(swProtocol *protocol, swSoc
     }
 
     uint32_t length = buffer->offset + eof_pos + protocol->package_eof_len;
+    data[2] = buffer->str;
+    data[3] = (void *) &length;
     swTraceLog(SW_TRACE_EOF_PROTOCOL, "#[4] count=%d, length=%d", count, length);
-    if (protocol->onPackage(protocol, conn, buffer->str, length) < 0)
+    if (protocol->onPackage(data, 4) < 0)
     {
         return SW_CLOSE;
     }
@@ -120,6 +126,10 @@ int swProtocol_recv_check_length(swProtocol *protocol, swSocket *conn, swString 
     uint8_t package_length_size = protocol->get_package_length_size ? protocol->get_package_length_size(conn) : protocol->package_length_size;
     uint32_t recv_size;
     ssize_t recv_n = 0;
+    void *data[4];
+
+    data[0] = protocol;
+    data[1] = conn;
 
     if (conn->skip_recv)
     {
@@ -168,7 +178,9 @@ int swProtocol_recv_check_length(swProtocol *protocol, swSocket *conn, swString 
             if (buffer->length >= (size_t) buffer->offset)
             {
                 _do_dispatch:
-                if (protocol->onPackage(protocol, conn, buffer->str, buffer->offset) < 0)
+                data[2] = buffer->str;
+                data[3] = (void *) &(buffer->offset);
+                if (protocol->onPackage(data, 4) < 0)
                 {
                     return SW_ERR;
                 }
@@ -261,6 +273,10 @@ int swProtocol_recv_check_eof(swProtocol *protocol, swSocket *conn, swString *bu
 {
     int recv_again = SW_FALSE;
     int buf_size;
+    void *data[4];
+    
+    data[0] = protocol;
+    data[1] = conn;
 
     _recv_data:
     buf_size = buffer->size - buffer->length;
@@ -316,7 +332,9 @@ int swProtocol_recv_check_eof(swProtocol *protocol, swSocket *conn, swString *bu
         }
         else if (memcmp(buffer->str + buffer->length - protocol->package_eof_len, protocol->package_eof, protocol->package_eof_len) == 0)
         {
-            if (protocol->onPackage(protocol, conn, buffer->str, buffer->length) < 0)
+            data[2] = buffer->str;
+            data[3] = (void *) &(buffer->length);
+            if (protocol->onPackage(data, 4) < 0)
             {
                 return SW_ERR;
             }

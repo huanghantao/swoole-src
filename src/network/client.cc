@@ -40,7 +40,7 @@ static int swClient_onWrite(swReactor *reactor, swEvent *event);
 static int swClient_onError(swReactor *reactor, swEvent *event);
 static void swClient_onTimeout(swTimer *timer, swTimer_node *tnode);
 static void swClient_onResolveCompleted(swAio_event *event);
-static int swClient_onPackage(swProtocol *proto, swSocket *conn, char *data, uint32_t length);
+static int swClient_onPackage(void **data, int data_size);
 
 static sw_inline void execute_onConnect(swClient *cli)
 {
@@ -1077,8 +1077,11 @@ static int swClient_https_proxy_handshake(swClient *cli)
 }
 #endif
 
-static int swClient_onPackage(swProtocol *proto, swSocket *conn, char *data, uint32_t length)
+static int swClient_onPackage(void **_data, int data_size)
 {
+    swSocket *conn = (swSocket *) _data[1];
+    char *data = (char *) _data[2];
+    uint32_t length = *((uint32_t *) _data[3]);
     swClient *cli = (swClient *) conn->object;
     cli->onReceive(cli, data, length);
     return conn->close_wait ? SW_ERR : SW_OK;

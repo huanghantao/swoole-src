@@ -138,7 +138,7 @@ int swHttpRequest_has_expect_header(swHttpRequest *request);
 #ifdef SW_USE_HTTP2
 ssize_t swHttpMix_get_package_length(swProtocol *protocol, swSocket *conn, char *data, uint32_t length);
 uint8_t swHttpMix_get_package_length_size(swSocket *conn);
-int swHttpMix_dispatch_frame(swProtocol *protocol, swSocket *conn, char *data, uint32_t length);
+int swHttpMix_dispatch_frame(void **_data, int data_size);
 #endif
 
 SW_EXTERN_C_END
