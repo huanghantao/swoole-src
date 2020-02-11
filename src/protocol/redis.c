@@ -40,13 +40,12 @@ int swRedis_recv(swProtocol *protocol, swConnection *conn, swString *buffer)
     int ret;
     char *buf_ptr;
     size_t buf_size;
-    void *data[4];
-
-    data[0] = protocol;
-    data[1] = socket;
-
     swRedis_request *request;
     swSocket *socket = conn->socket;
+    void *data[4];
+    
+    data[0] = protocol;
+    data[1] = socket;
 
     if (conn->object == NULL)
     {
