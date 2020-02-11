@@ -294,6 +294,8 @@ int swWebSocket_dispatch_frame(void **_data, int data_size)
         if (ws.header.FIN)
         {
             proto->ext_flags = conn->websocket_buffer->offset;
+            _data[2] = frame_buffer->str;
+            _data[3] = (void *) &(frame_buffer->length);
             swReactorThread_dispatch(_data, data_size);
             swString_free(frame_buffer);
             conn->websocket_buffer = NULL;
