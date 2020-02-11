@@ -1,13 +1,5 @@
 #include "tests.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-int swString_explode(swString *str, char *delimiter, size_t delimiter_length, swStringExplodeHandler handler, void **data, int data_size);
-#ifdef __cplusplus
-}
-#endif
-
 TEST(string, rtrim)
 {
     char buf[1024];
