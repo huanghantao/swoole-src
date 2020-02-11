@@ -89,17 +89,10 @@ TEST(string, strnaddr)
     }
 }
 
-static int explode_handler(void **data, int data_size)
-{
-    char *str = (char *) (data[data_size - 2]);
-    size_t length = (size_t) (data[data_size - 1]);
-    std::cout << str << std::endl;
-    std::cout << length << std::endl;
-    return 0;
-}
-
 TEST(string, explode)
 {
+    static char *explode_str;
+    static size_t explode_length;
     {
         char haystack[1024];
         uint32_t haystack_length;
@@ -114,6 +107,12 @@ TEST(string, explode)
         str.length = haystack_length;
         strcpy(needle, " ");
         needle_length = sizeof(" ") - 1;
-        swString_explode(&str, needle, needle_length, explode_handler, data, sizeof(data) / sizeof(*data));
+        swString_explode(&str, needle, needle_length, [](void **data, int data_size) -> int {
+            explode_str = (char *) (data[data_size - 2]);
+            explode_length = (size_t) (data[data_size - 1]);
+            return 0;
+        }, data, sizeof(data) / sizeof(*data));
+        ASSERT_EQ(haystack, explode_str);
+        ASSERT_EQ(6, explode_length);
     }
 }
