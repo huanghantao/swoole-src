@@ -1087,7 +1087,7 @@ int swReactorThread_dispatch(void **_data, int data_size)
     swProtocol *proto = (swProtocol *) _data[0];
     swSocket *socket = (swSocket *) _data[1];
     char *data = (char *) _data[2];
-    size_t length = *((size_t *) _data[3]);
+    size_t length = (size_t)(uintptr_t) _data[3];
     swServer *serv = (swServer *) proto->private_data_2;
     swSendData task;
 

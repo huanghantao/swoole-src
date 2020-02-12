@@ -337,7 +337,7 @@ static int swPort_onRead_raw(swReactor *reactor, swListenPort *port, swEvent *ev
     else
     {
         data[2] = buffer;
-        data[3] = (void *) &n;
+        data[3] = (void *)(uintptr_t) n;
         return swReactorThread_dispatch(data, 4);
     }
 }
@@ -564,7 +564,7 @@ static int swPort_onRead_http(swReactor *reactor, swListenPort *port, swEvent *e
             if (!serv->enable_static_handler || !swServer_http_static_handler_hit(serv, request, conn))
             {
                 data[2] = buffer->str;
-                data[3] = (void *) &(request->header_length);
+                data[3] = (void *)(uintptr_t) request->header_length;
                 // dynamic request, dispatch to worker
                 swReactorThread_dispatch(data, 4);
             }
@@ -670,7 +670,7 @@ static int swPort_onRead_http(swReactor *reactor, swListenPort *port, swEvent *e
     }
 
     data[2] = buffer->str;
-    data[3] = (void *) &(buffer->length);
+    data[3] = (void *)(uintptr_t) buffer->length;
     swReactorThread_dispatch(data, 4);
     swHttpRequest_free(conn);
 

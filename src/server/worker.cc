@@ -211,7 +211,7 @@ static int swWorker_onStreamPackage(void **_data, int data_size)
     swProtocol *proto = (swProtocol *) _data[0];
     swSocket *sock = (swSocket *) _data[1];
     char *data = (char *) _data[2];
-    uint32_t length = *((uint32_t *) _data[3]);
+    uint32_t length = (uint32_t)(uintptr_t) _data[3];
     swServer *serv = (swServer *) proto->private_data_2;
 
     /**

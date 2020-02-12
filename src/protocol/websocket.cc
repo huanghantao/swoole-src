@@ -246,7 +246,7 @@ int swWebSocket_dispatch_frame(void **_data, int data_size)
     swProtocol *proto = (swProtocol *) _data[0];
     swSocket *_socket = (swSocket *) _data[1];
     char *data = (char *) _data[2];
-    size_t length = *((size_t *) _data[3]);
+    size_t length = (size_t)(uintptr_t) _data[3];
 
     swServer *serv = (swServer *) proto->private_data_2;
     swConnection *conn = (swConnection *) _socket->object;
@@ -295,7 +295,7 @@ int swWebSocket_dispatch_frame(void **_data, int data_size)
         {
             proto->ext_flags = conn->websocket_buffer->offset;
             _data[2] = frame_buffer->str;
-            _data[3] = (void *) &(frame_buffer->length);
+            _data[3] = (void *)(uintptr_t) frame_buffer->length;
             swReactorThread_dispatch(_data, data_size);
             swString_free(frame_buffer);
             conn->websocket_buffer = NULL;
@@ -323,7 +323,7 @@ int swWebSocket_dispatch_frame(void **_data, int data_size)
         else
         {
             _data[2] = data + offset;
-            _data[3] = (void *) &(ws.payload_length);
+            _data[3] = (void *)(uintptr_t) ws.payload_length;
             swReactorThread_dispatch(_data, data_size);
         }
         break;
@@ -363,7 +363,7 @@ int swWebSocket_dispatch_frame(void **_data, int data_size)
             offset = length - ws.payload_length;
             proto->ext_flags = swWebSocket_get_ext_flags(ws.header.OPCODE, swWebSocket_get_flags(&ws));
             _data[2] = data + offset;
-            _data[3] = (void *) &(ws.payload_length);
+            _data[3] = (void *)(uintptr_t) ws.payload_length;
             swReactorThread_dispatch(_data, data_size);
 
             // Client attempt to close
