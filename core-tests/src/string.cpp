@@ -99,7 +99,8 @@ TEST(string, explode)
         char needle[8];
         uint32_t needle_length;
         swString str;
-        void *data[2];
+        void *data[3];
+        int data_size = sizeof(data) / sizeof(*data);
 
         strcpy(haystack, "hello world");
         haystack_length = sizeof("hello world") - 1;
@@ -108,11 +109,12 @@ TEST(string, explode)
         strcpy(needle, " ");
         needle_length = sizeof(" ") - 1;
         swString_explode(&str, needle, needle_length, [](void **data, int data_size) -> int {
-            explode_str = (char *) (data[data_size - 2]);
-            explode_length = (size_t) (data[data_size - 1]);
-            return 0;
-        }, data, sizeof(data) / sizeof(*data));
+            explode_str = (char *) (data[data_size - 3]);
+            explode_length = (size_t) (data[data_size - 2]);
+            return -10;
+        }, data, data_size);
         ASSERT_EQ(haystack, explode_str);
         ASSERT_EQ(6, explode_length);
+        ASSERT_EQ(-10, (int)(intptr_t) data[data_size - 1]);
     }
 }
